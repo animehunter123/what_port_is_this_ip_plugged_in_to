@@ -13,4 +13,4 @@ cd frontend
 npm i
 cd ..
 
-echo "Prereqs installed"
+echo "Prereqs installed on your host (later, we can dockerize it)."

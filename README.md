@@ -29,3 +29,5 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 ```
 
 * the nodejs backend shutsdown if the ssh fails, with ENOTFOUND
+
+* dockerize it before final release
