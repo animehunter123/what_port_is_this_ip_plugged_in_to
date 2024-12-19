@@ -4,8 +4,8 @@ const { spawn } = require('child_process');
 const { Console } = require('console');
 const expect = require('expect.js');
 
-const host = 'asdgasdgasdgasdg'; // Replace with your host
-const username = 'asdgasdgsdg'; // Replace with your username
+const host = 'asdgasdgasdgasdgasdg'; // Replace with your host
+const username = 'asdgasdgasdg'; // Replace with your username
 const password = 'asdgasdgasdg'; // Replace with your password
 const command = 'show mac-a'; // Command to execute
 
