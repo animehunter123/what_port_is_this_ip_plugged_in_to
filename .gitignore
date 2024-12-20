@@ -7,10 +7,17 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# node
 node_modules
 dist
 dist-ssr
 *.local
+
+# node local runtimes if you ran the ./download-nodejs-runtime-environment.sh
+node-v22.11.0-2024-12-20
+node-v22.11.0-linux-arm64.tar.xz
+node-v22.11.0-linux-x64.tar.gz
+start-webapp-localnode.sh
 
 # Editor directories and files
 .vscode/*
