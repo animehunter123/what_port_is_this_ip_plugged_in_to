@@ -8,7 +8,9 @@
 # The generated start-webapp-localnode.sh script should correctly set up the environment variables to use the downloaded Node.js runtime.
 
 # mkdir a directory for the binaries with todays date in a variable
-target_dir="node-v22.11.0-$(date +%Y-%m-%d)"
+# node_version="22.11.0"
+node_version="18.19.1"
+target_dir="node-v$node_version-$(date +%Y-%m-%d)"
 echo "Re-creating a fresh copy of node binaries in the local folder: $target_dir"
 rm -rf "$target_dir"
 mkdir -p "$target_dir"
@@ -17,13 +19,13 @@ cd "$target_dir"
 # if arm, or x64 download the correct binary
 echo "Extracting node binaries..."
 if [ "$(uname -m)" == "aarch64" ]; then
-    curl -L https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux-arm64.tar.xz -o node-v22.11.0-linux-arm64.tar.xz
-    tar xfJ node-v22.11.0-linux-arm64.tar.xz -C .
-    cd node-v22.11.0-linux-arm64
+    curl -L https://nodejs.org/dist/v$node_version/node-v$node_version-linux-arm64.tar.xz -o node-v$node_version-linux-arm64.tar.xz
+    tar xfJ node-v$node_version-linux-arm64.tar.xz -C .
+    cd node-v$node_version-linux-arm64
 else
-    curl -L https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux-x64.tar.gz -o node-v22.11.0-linux-x64.tar.gz
-    tar xf node-v22.11.0-linux-x64.tar.gz -C .
-    cd node-v22.11.0-linux-x64
+    curl -L https://nodejs.org/dist/v$node_version/node-v$node_version-linux-x64.tar.gz -o node-v$node_version-linux-x64.tar.gz
+    tar xf node-v$node_version-linux-x64.tar.gz -C .
+    cd node-v$node_version-linux-x64
 fi
 
 # cd node*
@@ -50,7 +52,7 @@ cat > ../../../start-webapp-localnode.sh << EOL
 SCRIPT_DIR="\$( cd "\$( dirname "\${BASH_SOURCE[0]}" )" && pwd )"
 
 # Set up Node.js environment variables
-export NODE_HOME="\$SCRIPT_DIR/node-v22.11.0-$(date +%Y-%m-%d)/node-v22.11.0-linux-\$(uname -m | grep -q "aarch64" && echo "arm64" || echo "x64")"
+export NODE_HOME="\$SCRIPT_DIR/node-v$node_version-$(date +%Y-%m-%d)/node-v$node_version-linux-\$(uname -m | grep -q "aarch64" && echo "arm64" || echo "x64")"
 export NPM_CONFIG_PREFIX="\$NODE_HOME/.npm-global"
 export NODE_PATH="\$NODE_HOME/lib/node_modules"
 export PATH="\$NODE_HOME/bin:\$PATH"

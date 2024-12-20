@@ -14,18 +14,8 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 
 * Still need to fix: 
 ```bash
-> curl -X POST http://localhost:5000/ssh \
-                     -H "Content-Type: application/json" \
-                     -d '{ "hostname": "ubuntu01.m.local" ,
-                     "username": "mydeuduser",
-                     "password": "mydude",
-                     "command": "hostname;uptime"
-                 }'
-
-                 and i got...
-
-                 
-{"stdout":"","stderr":"All configured authentication methods failed","rc":1,"error_msg":"SSH connection error","details":null}
+ > ./start-webapp-localnode.sh <--- this is a problem with node modules intermixing
+innerError Error: Cannot find module '../build/Debug/pty.node'
 ```
 
 * the nodejs backend shutsdown if the ssh fails, with ENOTFOUND
