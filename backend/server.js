@@ -62,6 +62,9 @@ app.post('/ssh', (req, res) => {
         }
     });
 
+    // Clean the output before sending response
+    cleanSSHOutput(output);
+
     // Fallback timeout
     setTimeout(() => {
         if (!res.headersSent) {
@@ -80,3 +83,20 @@ app.post('/ssh', (req, res) => {
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+
+// Function to clean up the \r \b characters, and replace the \\n with \n (for the output of the ssh cli command)
+function cleanSSHOutput(rawOutput) {
+    // Remove unwanted characters
+    return rawOutput
+        .replace(/\\r/g, '')         // Remove a "\\r"
+        .replace(/\\b/g, '')         // Remove a "\\b"
+        .replace(/\\n/g, '\n')         // Replace a "\\n" with "\n"
+        // .replace(/--More--/g, '')  // Remove pagination prompts (#TODO IM NOT SURE IF I NEED THIS YET)
+        .trim();                   // Trim leading and trailing whitespace
+}
+// Example usage
+// const rawOutput = "1    \r\n0050.5687.d2c4  1/3/2\nDynamic      1    \r\n--More--, next page: Space, next line: Return key, quit: Control-c\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b ";
+// const cleanedOutput = cleanSSHOutput(rawOutput);
+// console.log(cleanedOutput);
+
