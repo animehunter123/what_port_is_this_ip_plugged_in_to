@@ -63,7 +63,7 @@ app.post('/ssh', (req, res) => {
     });
 
     // Clean the output before sending response
-    cleanSSHOutput(output);
+    cleanSSHOutput(output);  //88888888888888888 THIS NEEDS TO BE TESTED ON LIVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // Fallback timeout
     setTimeout(() => {
