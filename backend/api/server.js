@@ -225,8 +225,7 @@ app.post('/find-device', (req, res) => {
         if (error) {
             console.error(`[ERROR] ${$final_target} is not reachable`);
             // process.exit(1);
-            res.status(400).json({ error: `${$final_target} is not reachable` });
-            return;
+            return res.status(400).json({ error: `${$final_target} is not reachable` });
 
         } else {
             console.log(`${$final_target} is reachable`);
@@ -391,13 +390,22 @@ app.post('/find-device', (req, res) => {
     
         // Determine if we need to strip the domain from the target
         const processedTarget = isIPAddress(target) ? target : stripDomain(target);
-    
-        const foundDevice = newDevices.find(device => 
-            device.dev_mac.toLowerCase() === processedTarget || 
-            device.dev_ip.toLowerCase() === processedTarget || 
-            device.dev_hostname.toLowerCase().includes(processedTarget)
+        // console.log(`@@@ OK target is ${target}`)
+        const foundDevice = newDevices.find( (device) => { 
+            device.dev_mac.toLowerCase() === processedTarget.toLowerCase() || 
+            device.dev_ip.toLowerCase() === processedTarget.toLowerCase() || 
+            device.dev_hostname.toLowerCase().includes(processedTarget.toLowerCase());
+            
+            // console.log(`@@@ OK target is /...`)
+            // console.log(device.dev_hostname.toLowerCase())
+            // console.log(`@@@ OK processtarget is /...`)
+            // console.log(processedTarget.toLowerCase());
+            // console.log(`@@@ OK target is ${target}`)
+            console.log(`@@@ OK processedtarget is ${processedTarget}`)
+            console.log(`@@@ OK dev_hostname is ${device.dev_hostname}\n`)
+        }
         );
-    
+        
         if (foundDevice) {
             console.log(`Final target ${target} found:`);
             console.log(foundDevice);
@@ -406,7 +414,7 @@ app.post('/find-device', (req, res) => {
         } else {
             console.log(`Final target ${target} NOT found in newDevices.`);
             // Return error
-            res.status(404).json({ error: `Final target ${target} NOT found` });
+            return;// res.status(400).json({ error: `Final target ${target} NOT found` });
         }
     }
         

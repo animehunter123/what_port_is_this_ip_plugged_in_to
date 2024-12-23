@@ -26,6 +26,7 @@ test_endpoint "192.168.0.105" '{"switch":"lm-sw01.lm.local","dev_mac":"0062.0b0a
 test_endpoint "lm-esx02.lm.local" '{"switch":"lm-sw01.lm.local","dev_mac":"0062.0b0a.d9a8","port":"1/1/7","dev_ip":"192.168.0.105","dev_hostname":"lm-esx02"}'
 test_endpoint "lm-esx02" '{"error":"lm-esx02 is not reachable"}'
 test_endpoint "FAKESERVERRRR.lm.local" '{"error":"FAKESERVERRRR.lm.local is not reachable"}'
+test_endpoint "WEBB-VPN-BOX.lm.local" '{"switch":"lm-sw01.lm.local","dev_mac":"b445.06fc.5428","port":"1/1/24","dev_ip":"192.168.0.54","dev_hostname":"idrac-H7BJPZ3 WEBB-VPN-BOX z_ah_w10_vpn_jt"}'
 
 echo "All tests passed successfully!"
 
