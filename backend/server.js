@@ -40,7 +40,7 @@ app.post('/ssh', (req, res) => {
 
     ssh.on('data', (data) => {
         output += data;
-        console.log(`Output: ${data}`);
+        // console.log(`Output: ${data}`);
 
         if (data.includes('Password:')) {
             ssh.write(`${password}\r`);
@@ -52,6 +52,10 @@ app.post('/ssh', (req, res) => {
         } else if (data.includes('SSH@LM-SW01>') && commandSent) {
             ssh.write('quit\r');
             ssh.kill();
+
+            // FINALLY, Clean the output before sending response
+            output = cleanSSHOutput(output);
+
             res.json({
                 stdout: output,
                 stderr: '',
@@ -63,7 +67,7 @@ app.post('/ssh', (req, res) => {
     });
 
     // Clean the output before sending response
-    cleanSSHOutput(output);  //88888888888888888 THIS NEEDS TO BE TESTED ON LIVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // output = cleanSSHOutput(output);  //88888888888888888 THIS NEEDS TO BE TESTED ON LIVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // Fallback timeout
     setTimeout(() => {
@@ -81,22 +85,43 @@ app.post('/ssh', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Our Express.js server is now listening on port ${port}`);
 });
 
 
-// Function to clean up the \r \b characters, and replace the \\n with \n (for the output of the ssh cli command)
+
 function cleanSSHOutput(rawOutput) {
-    // Remove unwanted characters
     return rawOutput
-        .replace(/\\r/g, '')         // Remove a "\\r"
-        .replace(/\\b/g, '')         // Remove a "\\b"
-        .replace(/\\n/g, '\n')         // Replace a "\\n" with "\n"
-        // .replace(/--More--/g, '')  // Remove pagination prompts (#TODO IM NOT SURE IF I NEED THIS YET)
-        .trim();                   // Trim leading and trailing whitespace
+        .replace(/\r/g, '')           // Remove carriage returns
+        .replace(/\b/g, '')           // Remove backspaces
+        .replace(/\x1B\[[0-9;]*[JKmsu]/g, '') // Remove ANSI escape sequences
+        .replace(/--More--.*?(\r?\n|\r)/g, '') // Remove pagination prompts and the rest of that line
+        .replace(/\n{3,}/g, '\n\n')   // Replace 3 or more newlines with just 2
+        .replace(/SSH@LM-SW01>/g, '') // Remove command prompts
+        .trim();                      // Trim leading and trailing whitespace
 }
-// Example usage
-// const rawOutput = "1    \r\n0050.5687.d2c4  1/3/2\nDynamic      1    \r\n--More--, next page: Space, next line: Return key, quit: Control-c\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b ";
-// const cleanedOutput = cleanSSHOutput(rawOutput);
-// console.log(cleanedOutput);
+
+
+
+// // Function to clean up the \r \b characters, and replace the \\n with \n (for the output of the ssh cli command)
+// function cleanSSHOutput(rawOutput) {
+//     // Remove unwanted characters
+//     return rawOutput
+
+//     .replace(/\r/g, '')           // Remove carriage returns
+//     .replace(/\b/g, '')           // Remove backspaces
+//     .replace(/\x1B\[[0-9;]*[JKmsu]/g, '') // Remove ANSI escape sequences
+//     .replace(/--More--.*?\r?\n/g, '') // Remove pagination prompts and the rest of that line
+//     .replace(/\n{3,}/g, '\n\n')   // Replace 3 or more newlines with just 2    
+
+//         .replace(/\\r/g, '')         // Remove a "\\r"
+//         .replace(/\\b/g, '')         // Remove a "\\b"
+//         .replace(/\\n/g, '\n')         // Replace a "\\n" with "\n"
+//         // .replace(/--More--/g, '')  // Remove pagination prompts (#TODO IM NOT SURE IF I NEED THIS YET)
+//         .trim();                   // Trim leading and trailing whitespace
+// }
+// // Example usage
+// // const rawOutput = "1    \r\n0050.5687.d2c4  1/3/2\nDynamic      1    \r\n--More--, next page: Space, next line: Return key, quit: Control-c\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b \b\b ";
+// // const cleanedOutput = cleanSSHOutput(rawOutput);
+// // console.log(cleanedOutput);
 
