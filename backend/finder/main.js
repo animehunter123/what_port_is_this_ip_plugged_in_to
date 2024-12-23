@@ -1,4 +1,16 @@
+// #TODO Need to change this to a endpoint which accepts a $final_target of HOST/MAC/IP
 
+// PHASE 0: When this endpoint recieves a target device to search for; first PING and if it response continue, else FAIL at this point
+$final_target="wekan.lm.local"  /* NOTE THIS CAN BE HOSTNAME, MAC, OR IP */
+const exec = require('child_process').exec;
+exec(`ping -c 1 ${$final_target}`, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`[ERROR] ${$final_target} is not reachable`);
+        process.exit(1);
+    } else {
+        console.log(`${$final_target} is reachable`);
+    }
+});
 
 // PHASE 1: SSH into each AGG Switch, and save "show mac-a" or "show mac a" to a table. Filter out to only lines which contain a '/', such as: "d08a.abcd.d419 1/1/9 Dynamic 180"
 let agg_switches = [
