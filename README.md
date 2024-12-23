@@ -20,12 +20,4 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 
 # TODO
 
-* Still need to fix: 
-```bash
- > ./start-webapp-localnode.sh <--- this is a problem with node modules intermixing
-innerError Error: Cannot find module '../build/Debug/pty.node'
-```
-
-* the nodejs backend shutsdown if the ssh fails, with ENOTFOUND
-
 * dockerize it before final release
