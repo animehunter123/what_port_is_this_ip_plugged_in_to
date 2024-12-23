@@ -35,5 +35,6 @@ start-webapp-localnode.sh
 *.sln
 *.sw?
 
-# Dns Zone files
+# Nmaps, Dns Zone files
 target_dns
+network_scan_results.json
