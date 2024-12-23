@@ -15,7 +15,7 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 # PHASE 2: SSH into the CORE Switch, and save "show arp" to a table
 # For each line in the filtered list, grep for that mac address in the CORE ARP list to get the live IP Address, and add it to the line.
 # PHASE 3: Now NSLookup or DNSCMD parse the DNS to get the hostname, and add it to the line
-# Now you have a table ready, and serve this to the front end
+# Now you have a table ready, and serve this to the front end (switch/devmac,switchport,devip,devhostname)
 
 # TODO
 
