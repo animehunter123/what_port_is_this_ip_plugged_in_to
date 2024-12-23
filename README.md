@@ -20,4 +20,8 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 
 # TODO
 
+* remove the hardcoded lm-sw01 from the spacebar checker
+
+* make finder/main.js do everything to get the fields
+
 * dockerize it before final release
