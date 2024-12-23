@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from the backend!' });
+    res.json({ message: 'Hello from the backend!' });
 });
 
 /* You can test this endpoint with curl:
@@ -54,7 +54,16 @@ app.post('/ssh', (req, res) => {
             ssh.kill();
 
             // FINALLY, Clean the output before sending response
-            output = cleanSSHOutput(output);
+            // output = cleanSSHOutput(output);
+            // Clean the output based on the command
+            let cleanedOutput;
+            if (command.includes('show arp')) {
+                cleanedOutput = cleanOutput_ShowArp(output);
+            } else if (command.includes('show mac-a')) {
+                cleanedOutput = cleanOutput_ShowMacAddr(output);
+            } else {
+                cleanedOutput = output; // For other commands, don't clean
+            }
 
             res.json({
                 stdout: output,
@@ -65,9 +74,6 @@ app.post('/ssh', (req, res) => {
             });
         }
     });
-
-    // Clean the output before sending response
-    // output = cleanSSHOutput(output);  //88888888888888888 THIS NEEDS TO BE TESTED ON LIVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // Fallback timeout
     setTimeout(() => {
@@ -85,8 +91,35 @@ app.post('/ssh', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Our Express.js server is now listening on port ${port}`);
+    console.log(`Our Express.js server is now listening on port ${port}`);
 });
+
+
+
+function cleanOutput_ShowArp(rawOutput) {
+    return rawOutput
+        .replace(/\r\n?|\n/g, '\n')  // Normalize line endings
+        .replace(/^.*?Total number of ARP entries:/m, 'Total number of ARP entries:')  // Remove everything before the total count
+        .replace(/SSH@LM-SW01>.*/s, '')  // Remove the command prompt at the end
+        .replace(/--More--.*?(\n|$)/g, '')  // Remove "--More--" prompts
+        .replace(/\x1B\[[0-9;]*[JKmsu]/g, '')  // Remove ANSI escape sequences
+        // .replace(/\b+/g, '')  // Remove backspace characters
+        .trim();  // Trim leading and trailing whitespace
+}
+
+function cleanOutput_ShowMacAddr(rawOutput) {
+    return rawOutput
+        .replace(/\r\n?|\n/g, '\n')  // Normalize line endings
+        .replace(/^.*?Total active entries from all ports =/m, 'Total active entries from all ports =')  // Remove everything before the total count
+        .replace(/SSH@LM-SW01>.*/s, '')  // Remove the command prompt at the end
+        .replace(/--More--.*?(\n|$)/g, '')  // Remove "--More--" prompts
+        .replace(/\x1B\[[0-9;]*[JKmsu]/g, '')  // Remove ANSI escape sequences
+        // .replace(/\b+/g, '')  // Remove backspace characters
+        .replace(/MAC-Address\s+Port\s+Type\s+VLAN\s+/g, '')  // Remove repeated header
+        .trim();  // Trim leading and trailing whitespace
+}
+
+
 
 
 
@@ -112,7 +145,7 @@ function cleanSSHOutput(rawOutput) {
 //     .replace(/\b/g, '')           // Remove backspaces
 //     .replace(/\x1B\[[0-9;]*[JKmsu]/g, '') // Remove ANSI escape sequences
 //     .replace(/--More--.*?\r?\n/g, '') // Remove pagination prompts and the rest of that line
-//     .replace(/\n{3,}/g, '\n\n')   // Replace 3 or more newlines with just 2    
+//     .replace(/\n{3,}/g, '\n\n')   // Replace 3 or more newlines with just 2
 
 //         .replace(/\\r/g, '')         // Remove a "\\r"
 //         .replace(/\\b/g, '')         // Remove a "\\b"

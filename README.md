@@ -9,6 +9,14 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 * dig/dns get the hostname for IP in the latest list
 * Show a table which shows which "IP" "Hostname" is mapped to "Switch" "Port"; that is sortable.
 
+# Final Pseudo-code Idea
+
+# SSH into each AGG Switch, and save "show mac-a" or "show mac a" to a table.
+# Filter out to only lines which contain a '/', such as: "d08a.abcd.d419 1/1/9 Dynamic 180"
+# SSH into the CORE Switch, and save "show arp" to a table
+# For each line in the filtered list, grep for that mac address in the CORE ARP list to get the live IP Address, and add it to the line.
+# Now NSLookup or DNSCMD parse the DNS to get the hostname, and add it to the line
+# Now you have a table ready, and serve this to the front end
 
 # TODO
 
