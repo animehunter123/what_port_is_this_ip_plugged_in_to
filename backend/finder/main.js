@@ -65,53 +65,45 @@ Promise.all(fetchPromises).finally(() => {
     // console.log('New devices:', newDevices);
 
     // PHASE 2: SSH into the CORE Switch, and save "show arp" to a table
-    let arpPromises = agg_switches.map(host => {
-        return fetch('http://localhost:5000/ssh', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                host,
-                username: 'admin',
-                password: 'Oriole3',
-                command: 'show arp'
-            })
-        }).then(response => response.json()).then(data => {
-            // Include the host in the result for later use
-            data.host = host; // Add the host to the result
-            return data;
-        });
-    });
+    const core_switch = "lm-sw01.lm.local"; // Define core_switch variable
 
-    Promise.all(arpPromises).finally(() => {
-        // Process the ARP results
-        const arpResults = arpPromises.map(p => p.then(data => data));
-        Promise.all(arpResults).then(arpData => {
-            arpData.forEach(result => {
-                if (result.stdout) {
-                    const arpLines = result.stdout.split('\n').filter(line => {
-                        // Regular expression to match ARP entries
-                        return /(\d+\s+\d+\.\d+\.\d+\.\d+\s+[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})/i.test(line);
-                    });
-
-                    arpLines.forEach(line => {
-                        const fields = line.split(/\s+/);
-                        const ip = fields[1]; // IP Address
-                        const mac = fields[2]; // MAC Address
-
-                        // Update newDevices with the IP address if the MAC matches
-                        newDevices.forEach(device => {
-                            if (device.dev_mac === mac) {
-                                device.dev_ip = ip; // Update the IP address
-                            }
-                        });
-                    });
-                }
+    return fetch('http://localhost:5000/ssh', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            host: core_switch, // Use core_switch variable
+            username: 'admin',
+            password: 'Oriole3',
+            command: 'show arp'
+        })
+    }).then(response => response.json()).then(data => {
+        // Include the host in the result for later use
+        data.host = core_switch; // Add the host to the result
+        return data;
+    }).then(result => {
+        if (result.stdout) {
+            const arpLines = result.stdout.split('\n').filter(line => {
+                // Regular expression to match ARP entries
+                return /(\d+\s+\d+\.\d+\.\d+\.\d+\s+[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})/i.test(line);
             });
 
-            // Log the updated devices array
-            console.log('Updated devices with IP addresses:', newDevices);
-        });
+            arpLines.forEach(line => {
+                const fields = line.split(/\s+/);
+                const ip = fields[1]; // IP Address
+                const mac = fields[2]; // MAC Address
+
+                // Update newDevices with the IP address if the MAC matches
+                newDevices.forEach(device => {
+                    if (device.dev_mac === mac) {
+                        device.dev_ip = ip; // Update the IP address
+                    }
+                });
+            });
+        }
+
+        // Log the updated devices array
+        console.log('Updated devices with IP addresses:', newDevices);
     });
 });
