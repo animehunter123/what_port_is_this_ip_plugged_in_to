@@ -1,6 +1,6 @@
 
 
-// SSH into each AGG Switch, and save "show mac-a" or "show mac a" to a table.
+// PHASE 1: SSH into each AGG Switch, and save "show mac-a" or "show mac a" to a table. Filter out to only lines which contain a '/', such as: "d08a.abcd.d419 1/1/9 Dynamic 180"
 let agg_switches = [
     "lm-sw01.lm.local"
 ];
@@ -64,3 +64,10 @@ Promise.all(fetchPromises).finally(() => {
     // Log the new devices array
     console.log('New devices:', newDevices);
 });
+
+
+
+
+
+
+// PHASE 2: SSH into the CORE Switch, and save "show arp" to a table
