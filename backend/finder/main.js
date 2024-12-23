@@ -1,7 +1,9 @@
 // #TODO Need to change this to a endpoint which accepts a $final_target of HOST/MAC/IP
 
 // PHASE 0: When this endpoint recieves a target device to search for; first PING and if it response continue, else FAIL at this point
-$final_target="wekan.lm.local"  /* NOTE THIS CAN BE HOSTNAME, MAC, OR IP */
+// $final_target="wekan.lm.local"  /* NOTE THIS CAN BE HOSTNAME, MAC, OR IP */
+$final_target="192.168.0.105"  /* NOTE THIS CAN BE HOSTNAME, MAC, OR IP */
+
 const exec = require('child_process').exec;
 exec(`ping -c 1 ${$final_target}`, (error, stdout, stderr) => {
     if (error) {
@@ -149,7 +151,15 @@ Promise.all(fetchPromises).finally(() => {
             }
         });
 
-        // Log the final devices array with hostnames
+        // Log the final devices array with hostnames (THIS PRINTS OUT EVERYTHING)
         console.log('Final devices with hostnames:', newDevices);
+
+        // // Finally, if the $final_target is in this newDevices, print it out:
+        // if (process.env.final_target && newDevices.find(device => device.dev_mac === process.env.final_target)) {
+        //     console.log(`Final target ${process.env.final_target} found:`);
+        //     console.log(newDevices.find(device => device.dev_mac === process.env.final_target));
+        //     // process.exit(0);
+        // }
+
     });
 });
