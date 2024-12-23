@@ -224,7 +224,10 @@ app.post('/find-device', (req, res) => {
     exec(`ping -c 1 ${$final_target}`, (error, stdout, stderr) => {
         if (error) {
             console.error(`[ERROR] ${$final_target} is not reachable`);
-            process.exit(1);
+            // process.exit(1);
+            res.status(400).json({ error: `${$final_target} is not reachable` });
+            return;
+
         } else {
             console.log(`${$final_target} is reachable`);
         }
@@ -373,14 +376,28 @@ app.post('/find-device', (req, res) => {
             // console.log('Final devices with hostnames:', newDevices);
     
     // Finally, if the $final_target is in this newDevices, print it out:
+
     if ($final_target) {
-        const target = $final_target;
+        const target = $final_target.toLowerCase();
+    
+        // Function to check if a string is an IP address
+        const isIPAddress = (str) => {
+            const ipPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            return ipPattern.test(str);
+        };
+    
+        // Function to strip the domain from a hostname
+        const stripDomain = (str) => str.replace(/\..*$/, '').toLowerCase();
+    
+        // Determine if we need to strip the domain from the target
+        const processedTarget = isIPAddress(target) ? target : stripDomain(target);
+    
         const foundDevice = newDevices.find(device => 
-            device.dev_mac.toLowerCase() === target.toLowerCase() || 
-            device.dev_ip.toLowerCase() === target.toLowerCase() || 
-            device.dev_hostname.toLowerCase().includes(target.toLowerCase())
+            device.dev_mac.toLowerCase() === processedTarget || 
+            device.dev_ip.toLowerCase() === processedTarget || 
+            device.dev_hostname.toLowerCase().includes(processedTarget)
         );
-                
+    
         if (foundDevice) {
             console.log(`Final target ${target} found:`);
             console.log(foundDevice);
@@ -391,7 +408,10 @@ app.post('/find-device', (req, res) => {
             // Return error
             res.status(404).json({ error: `Final target ${target} NOT found` });
         }
-    } else {
+    }
+        
+    
+    else {
         console.log('No final target specified.');
         // Return error
         res.status(400).json({ error: 'No final target specified' });
