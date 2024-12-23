@@ -121,45 +121,60 @@ Promise.all(fetchPromises).finally(() => {
         // console.log('Updated devices with IP addresses:', newDevices);
 
         // PHASE 3: Populate dev_hostname from DNS records
-        const dnsRecords = {}; // To hold A records and CNAMEs
-        const dnsFilePath = './target_dns/lm.local_2024.12.23.zone';
+const dnsRecords = {}; // To hold A records and CNAMEs
+const dnsFilePath = './target_dns/lm.local_2024.12.23.zone';
 
-        // Read the DNS records file
-        const dnsData = require('fs').readFileSync(dnsFilePath, 'utf-8').split('\n');
+// Read the DNS records file
+const dnsData = require('fs').readFileSync(dnsFilePath, 'utf-8').split('\n');
 
-        dnsData.forEach(line => {
-            const parts = line.trim().split(/\s+/);
-            if (parts.length > 0) {
-                const recordName = parts[0];
-                const recordType = parts[3];
-                const recordValue = parts[4];
+dnsData.forEach(line => {
+    // Use regex to capture relevant parts
+    const dnsMatch = line.match(/^(\S+)\s+(\[AGE:\d+\])?\s+(\d+)?\s*(A|CNAME)\s+(\S+)/);
+    if (dnsMatch) {
+        const recordName = dnsMatch[1];
+        const recordType = dnsMatch[4];
+        const recordValue = dnsMatch[5];
 
-                if (recordType === 'A') {
-                    dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
-                    dnsRecords[recordValue].hostnames.push(recordName);
-                } else if (recordType === 'CNAME') {
-                    dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
-                    dnsRecords[recordValue].hostnames.push(recordName);
-                }
-            }
-        });
+        if (recordType === 'A') {
+            dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
+            dnsRecords[recordValue].hostnames.push(recordName);
+        } else if (recordType === 'CNAME') {
+            dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
+            dnsRecords[recordValue].hostnames.push(recordName);
+        }
+    }
+});
 
-        // Populate dev_hostname for each device
-        newDevices.forEach(device => {
-            if (device.dev_ip && dnsRecords[device.dev_ip]) {
-                device.dev_hostname = dnsRecords[device.dev_ip].hostnames.join(' '); // Join hostnames with space
-            }
-        });
+// Populate dev_hostname for each device
+newDevices.forEach(device => {
+    if (device.dev_ip && dnsRecords[device.dev_ip]) {
+        device.dev_hostname = dnsRecords[device.dev_ip].hostnames.join(' '); // Join hostnames with space
+    }
+});
+
 
         // Log the final devices array with hostnames (THIS PRINTS OUT EVERYTHING)
-        console.log('Final devices with hostnames:', newDevices);
+        // console.log('Final devices with hostnames:', newDevices);
 
-        // // Finally, if the $final_target is in this newDevices, print it out:
-        // if (process.env.final_target && newDevices.find(device => device.dev_mac === process.env.final_target)) {
-        //     console.log(`Final target ${process.env.final_target} found:`);
-        //     console.log(newDevices.find(device => device.dev_mac === process.env.final_target));
-        //     // process.exit(0);
-        // }
+// Finally, if the $final_target is in this newDevices, print it out:
+if ($final_target) {
+    const target = $final_target;
+    const foundDevice = newDevices.find(device => 
+        device.dev_mac.toLowerCase() === target.toLowerCase() || 
+        device.dev_ip.toLowerCase() === target.toLowerCase() || 
+        device.dev_hostname.toLowerCase() === target.toLowerCase()
+    );
+    
+    if (foundDevice) {
+        console.log(`Final target ${target} found:`);
+        console.log(foundDevice);
+        // process.exit(0);
+    } else {
+        console.log(`Final target ${target} NOT found in newDevices.`);
+    }
+} else {
+    console.log('No final target specified.');
+}
 
     });
 });
