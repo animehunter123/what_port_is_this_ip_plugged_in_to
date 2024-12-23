@@ -20,6 +20,8 @@ let fetchPromises = agg_switches.map(host => {
         })
     }).then(response => response.json())
     .then(data => {
+        // Include the host in the result for later use
+        data.host = host; // Add the host to the result
         results.push(data);
     });
 });
@@ -48,7 +50,7 @@ Promise.all(fetchPromises).finally(() => {
                 const mac = fields[0];
                 const port = fields[1];
                 acc.push({
-                    switch: result.host,
+                    switch: result.host, // Use the host from the result
                     dev_mac: mac,
                     port,
                     dev_ip: '',
