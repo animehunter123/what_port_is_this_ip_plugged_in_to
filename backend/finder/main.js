@@ -86,7 +86,7 @@ Promise.all(fetchPromises).finally(() => {
         if (result.stdout) {
             const arpLines = result.stdout.split('\n').filter(line => {
                 // Regular expression to match ARP entries
-                return /(\d+\s+\d+\.\d+\.\d+\.\d+\s+[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})/i.test(line);
+                return /(\d+\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+(?:[0-9a-f]{4}\.){2}[0-9a-f]{4})/i.test(line);
             });
 
             arpLines.forEach(line => {
@@ -104,6 +104,40 @@ Promise.all(fetchPromises).finally(() => {
         }
 
         // Log the updated devices array
-        console.log('Updated devices with IP addresses:', newDevices);
+        // console.log('Updated devices with IP addresses:', newDevices);
+
+        // PHASE 3: Populate dev_hostname from DNS records
+        const dnsRecords = {}; // To hold A records and CNAMEs
+        const dnsFilePath = 'c:/Users/ahmed-adm/dev/what_port_is_this_ip_plugged_in_to/backend/finder/target_dns/lm.local_2024.12.23.zone';
+
+        // Read the DNS records file
+        const dnsData = require('fs').readFileSync(dnsFilePath, 'utf-8').split('\n');
+
+        dnsData.forEach(line => {
+            const parts = line.trim().split(/\s+/);
+            if (parts.length > 0) {
+                const recordName = parts[0];
+                const recordType = parts[3];
+                const recordValue = parts[4];
+
+                if (recordType === 'A') {
+                    dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
+                    dnsRecords[recordValue].hostnames.push(recordName);
+                } else if (recordType === 'CNAME') {
+                    dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
+                    dnsRecords[recordValue].hostnames.push(recordName);
+                }
+            }
+        });
+
+        // Populate dev_hostname for each device
+        newDevices.forEach(device => {
+            if (device.dev_ip && dnsRecords[device.dev_ip]) {
+                device.dev_hostname = dnsRecords[device.dev_ip].hostnames.join(' '); // Join hostnames with space
+            }
+        });
+
+        // Log the final devices array with hostnames
+        console.log('Final devices with hostnames:', newDevices);
     });
 });
