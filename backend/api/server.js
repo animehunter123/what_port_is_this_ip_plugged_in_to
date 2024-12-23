@@ -231,12 +231,12 @@ app.post('/find-device', (req, res) => {
             console.log(`${$final_target} is reachable`);
         }
     });
-    
+
     // PHASE 1: SSH into each AGG Switch, and save "show mac-a" or "show mac a" to a table. Filter out to only lines which contain a '/', such as: "d08a.abcd.d419 1/1/9 Dynamic 180"
     let agg_switches = [
         "lm-sw01.lm.local"
     ];
-    
+
     let results = [];
     let fetchPromises = agg_switches.map(host => {
         return fetch('http://localhost:5000/ssh', {
@@ -251,17 +251,17 @@ app.post('/find-device', (req, res) => {
                 command: 'show mac-a'
             })
         }).then(response => response.json())
-        .then(data => {
-            // Include the host in the result for later use
-            data.host = host; // Add the host to the result
-            results.push(data);
-        });
+            .then(data => {
+                // Include the host in the result for later use
+                data.host = host; // Add the host to the result
+                results.push(data);
+            });
     });
-    
+
     Promise.all(fetchPromises).finally(() => {
         // Log the results to see what is being returned
         // console.log('Raw results:', results);
-    
+
         // At this point, every item in "results" is a valid mac address, and port number", lets add this to device list
         const newDevices = results.reduce((acc, result) => {
             if (result.stdout) {
@@ -273,10 +273,10 @@ app.post('/find-device', (req, res) => {
                     const hasSlashInSecondField = fields[1] && fields[1].includes('/');
                     return macMatch && hasSlashInSecondField;
                 });
-    
+
                 // Log the filtered MAC lines
                 // console.log('Filtered MAC Lines:', macLines);
-    
+
                 macLines.forEach(line => {
                     const fields = line.split(/\s+/);
                     const mac = fields[0];
@@ -292,13 +292,13 @@ app.post('/find-device', (req, res) => {
             }
             return acc;
         }, []);
-        
+
         // Log the new devices array
         // console.log('New devices:', newDevices);
-    
+
         // PHASE 2: SSH into the CORE Switch, and save "show arp" to a table
         const core_switch = "lm-sw01.lm.local"; // Define core_switch variable
-    
+
         return fetch('http://localhost:5000/ssh', {
             method: 'POST',
             headers: {
@@ -320,12 +320,12 @@ app.post('/find-device', (req, res) => {
                     // Regular expression to match ARP entries
                     return /(\d+\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+(?:[0-9a-f]{4}\.){2}[0-9a-f]{4})/i.test(line);
                 });
-    
+
                 arpLines.forEach(line => {
                     const fields = line.split(/\s+/);
                     const ip = fields[1]; // IP Address
                     const mac = fields[2]; // MAC Address
-    
+
                     // Update newDevices with the IP address if the MAC matches
                     newDevices.forEach(device => {
                         if (device.dev_mac === mac) {
@@ -334,99 +334,100 @@ app.post('/find-device', (req, res) => {
                     });
                 });
             }
-    
+
             // Log the updated devices array
             // console.log('Updated devices with IP addresses:', newDevices);
-    
+
             // PHASE 3: Populate dev_hostname from DNS records
-    const dnsRecords = {}; // To hold A records and CNAMEs
-    const dnsFilePath = './target_dns/lm.local_2024.12.23.zone';
-    
-    // Read the DNS records file
-    const dnsData = require('fs').readFileSync(dnsFilePath, 'utf-8').split('\n');
-    
-    dnsData.forEach(line => {
-        // Use regex to capture relevant parts
-        const dnsMatch = line.match(/^(\S+)\s+(\[AGE:\d+\])?\s+(\d+)?\s*(A|CNAME)\s+(\S+)/);
-        if (dnsMatch) {
-            const recordName = dnsMatch[1];
-            const recordType = dnsMatch[4];
-            const recordValue = dnsMatch[5];
-    
-            if (recordType === 'A') {
-                dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
-                dnsRecords[recordValue].hostnames.push(recordName);
-            } else if (recordType === 'CNAME') {
-                dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
-                dnsRecords[recordValue].hostnames.push(recordName);
-            }
-        }
-    });
-    
-    // Populate dev_hostname for each device
-    newDevices.forEach(device => {
-        if (device.dev_ip && dnsRecords[device.dev_ip]) {
-            device.dev_hostname = dnsRecords[device.dev_ip].hostnames.join(' '); // Join hostnames with space
-        }
-    });
-    
-    
+            const dnsRecords = {}; // To hold A records and CNAMEs
+            const dnsFilePath = './target_dns/lm.local_2024.12.23.zone';
+
+            // Read the DNS records file
+            const dnsData = require('fs').readFileSync(dnsFilePath, 'utf-8').split('\n');
+
+            dnsData.forEach(line => {
+                // Use regex to capture relevant parts
+                const dnsMatch = line.match(/^(\S+)\s+(\[AGE:\d+\])?\s+(\d+)?\s*(A|CNAME)\s+(\S+)/);
+                if (dnsMatch) {
+                    const recordName = dnsMatch[1];
+                    const recordType = dnsMatch[4];
+                    const recordValue = dnsMatch[5];
+
+                    if (recordType === 'A') {
+                        dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
+                        dnsRecords[recordValue].hostnames.push(recordName);
+                    } else if (recordType === 'CNAME') {
+                        dnsRecords[recordValue] = dnsRecords[recordValue] || { hostnames: [] };
+                        dnsRecords[recordValue].hostnames.push(recordName);
+                    }
+                }
+            });
+
+            // Populate dev_hostname for each device
+            newDevices.forEach(device => {
+                if (device.dev_ip && dnsRecords[device.dev_ip]) {
+                    device.dev_hostname = dnsRecords[device.dev_ip].hostnames.join(' '); // Join hostnames with space
+                }
+            });
+
+
             // Log the final devices array with hostnames (THIS PRINTS OUT EVERYTHING)
             // console.log('Final devices with hostnames:', newDevices);
-    
-    // Finally, if the $final_target is in this newDevices, print it out:
 
-    if ($final_target) {
-        const target = $final_target.toLowerCase();
-    
-        // Function to check if a string is an IP address
-        const isIPAddress = (str) => {
-            const ipPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-            return ipPattern.test(str);
-        };
-    
-        // Function to strip the domain from a hostname
-        const stripDomain = (str) => str.replace(/\..*$/, '').toLowerCase();
-    
-        // Determine if we need to strip the domain from the target
-        const processedTarget = isIPAddress(target) ? target : stripDomain(target);
-        // console.log(`@@@ OK target is ${target}`)
-        const foundDevice = newDevices.find( (device) => { 
-            device.dev_mac.toLowerCase() === processedTarget.toLowerCase() || 
-            device.dev_ip.toLowerCase() === processedTarget.toLowerCase() || 
-            device.dev_hostname.toLowerCase().includes(processedTarget.toLowerCase());
-            
-            // console.log(`@@@ OK target is /...`)
-            // console.log(device.dev_hostname.toLowerCase())
-            // console.log(`@@@ OK processtarget is /...`)
-            // console.log(processedTarget.toLowerCase());
-            // console.log(`@@@ OK target is ${target}`)
-            console.log(`@@@ OK processedtarget is ${processedTarget}`)
-            console.log(`@@@ OK dev_hostname is ${device.dev_hostname}\n`)
-        }
-        );
-        
-        if (foundDevice) {
-            console.log(`Final target ${target} found:`);
-            console.log(foundDevice);
-            // Return success and the foundDevice object
-            res.status(200).json(foundDevice);
-        } else {
-            console.log(`Final target ${target} NOT found in newDevices.`);
-            // Return error
-            return;// res.status(400).json({ error: `Final target ${target} NOT found` });
-        }
-    }
-        
-    
-    else {
-        console.log('No final target specified.');
-        // Return error
-        res.status(400).json({ error: 'No final target specified' });
-    }
-    
+            // Finally, if the $final_target is in this newDevices, print it out:
+
+            if ($final_target) {
+                const target = $final_target.toLowerCase();
+
+                // Function to check if a string is an IP address
+                const isIPAddress = (str) => {
+                    const ipPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+                    return ipPattern.test(str);
+                };
+
+                // Function to strip the domain from a hostname
+                const stripDomain = (str) => str.replace(/\..*$/, '').toLowerCase();
+
+                // Determine if we need to strip the domain from the target
+                const processedTarget = isIPAddress(target) ? target : stripDomain(target);
+                // console.log(`@@@ OK target is ${target}`)
+                const foundDevice = newDevices.find((device) => {
+                    // console.log(`@@@ OK target is /...`)
+                    // console.log(device.dev_hostname.toLowerCase())
+                    // console.log(`@@@ OK processtarget is /...`)
+                    // console.log(processedTarget.toLowerCase());
+                    // console.log(`@@@ OK target is ${target}`)
+                    console.log(`@@@ OK processedtarget is ${processedTarget}`)
+                    console.log(`@@@ OK dev_hostname is ${device.dev_hostname}\n`)
+
+                    return device.dev_mac.toLowerCase() === processedTarget.toLowerCase() ||
+                        device.dev_ip.toLowerCase() === processedTarget.toLowerCase() ||
+                        device.dev_hostname.toLowerCase().includes(processedTarget.toLowerCase());
+
+                }
+                );
+
+                if (foundDevice) {
+                    console.log(`Final target ${target} found:`);
+                    console.log(foundDevice);
+                    // Return success and the foundDevice object
+                    res.status(200).json(foundDevice);
+                } else {
+                    console.log(`Final target ${target} NOT found in newDevices.`);
+                    // Return error
+                    return;// res.status(400).json({ error: `Final target ${target} NOT found` });
+                }
+            }
+
+
+            else {
+                console.log('No final target specified.');
+                // Return error
+                res.status(400).json({ error: 'No final target specified' });
+            }
+
         });
-    });    
+    });
 
 
 });
