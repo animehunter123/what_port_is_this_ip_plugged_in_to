@@ -26,7 +26,9 @@ function isValidLAN(ip) {
 function scanSubnet(subnet, interfaceName) {
     return new Promise((resolve, reject) => {
         console.log(`OK ABOUT TO RUN: nmap -sn ${subnet} -e ${interfaceName}`);
-        exec(`nmap -sn ${subnet} -e ${interfaceName}`, (error, stdout) => {
+        // exec(`nmap -sn ${subnet} -e ${interfaceName}`, (error, stdout) => {
+        // nmap -sn -PR -PE -PP -PM -n -R --resolve-all --system-dns --traceroute -O -sV -p- --max-parallelism 100 --min-rate 5000 172.19.119.0/24 -e eth0
+        exec(`sudo nmap -PR -PE -PP -PM -n -R --resolve-all --system-dns --max-parallelism 100 --min-rate 5000 ${subnet} -e ${interfaceName}`, (error, stdout) => {
             if (error) {
                 return reject(error);
             }
