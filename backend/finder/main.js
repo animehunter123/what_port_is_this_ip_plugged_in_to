@@ -108,7 +108,7 @@ Promise.all(fetchPromises).finally(() => {
 
         // PHASE 3: Populate dev_hostname from DNS records
         const dnsRecords = {}; // To hold A records and CNAMEs
-        const dnsFilePath = 'c:/Users/ahmed-adm/dev/what_port_is_this_ip_plugged_in_to/backend/finder/target_dns/lm.local_2024.12.23.zone';
+        const dnsFilePath = './target_dns/lm.local_2024.12.23.zone';
 
         // Read the DNS records file
         const dnsData = require('fs').readFileSync(dnsFilePath, 'utf-8').split('\n');

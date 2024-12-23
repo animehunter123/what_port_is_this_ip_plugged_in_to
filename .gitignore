@@ -34,3 +34,6 @@ start-webapp-localnode.sh
 *.njsproj
 *.sln
 *.sw?
+
+# Dns Zone files
+target_dns
