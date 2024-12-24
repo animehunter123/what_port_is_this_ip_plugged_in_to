@@ -29,7 +29,7 @@ let fetchPromises = agg_switches.map(host => {
         body: JSON.stringify({
             host,
             username: 'admin',
-            password: 'Oriole3',
+            password: 'OLKJHLKJHLKJ3',
             command: 'show mac-a'
         })
     }).then(response => response.json())
@@ -89,7 +89,7 @@ Promise.all(fetchPromises).finally(() => {
         body: JSON.stringify({
             host: core_switch, // Use core_switch variable
             username: 'admin',
-            password: 'Oriole3',
+            password: 'OLKJHLKJHLKJ3',
             command: 'show arp'
         })
     }).then(response => response.json()).then(data => {

@@ -247,7 +247,7 @@ app.post('/find-device', (req, res) => {
             body: JSON.stringify({
                 host,
                 username: 'admin',
-                password: 'Oriole3',
+                password: 'OLKJHLKJHLKJ3',
                 command: 'show mac-a'
             })
         }).then(response => response.json())
@@ -307,7 +307,7 @@ app.post('/find-device', (req, res) => {
             body: JSON.stringify({
                 host: core_switch, // Use core_switch variable
                 username: 'admin',
-                password: 'Oriole3',
+                password: 'OLKJHLKJHLKJ3',
                 command: 'show arp'
             })
         }).then(response => response.json()).then(data => {
