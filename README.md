@@ -17,6 +17,14 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 
 # TODO
 
+* Timeout with AbortApi in frontend is required. This is a bit difficult, but need to do it for reactivity
+
+* Need to add error checking on startup to ensure this file exists, example: ```ls target_dns/test.local_2024.12.23.zone```
+
+* Need to make the frontend ensure ./node_modules exists or runs locally 
+
+* Unit Test needs to echo before posting as it goes
+
 * Fix the server crashes, when I do 2 posts of "BB", it crashes the server with
 ```
 node:internal/errors:496

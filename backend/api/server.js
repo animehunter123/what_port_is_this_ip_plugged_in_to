@@ -22,7 +22,6 @@ curl -X POST http://localhost:5000/ssh \
 */
 app.post('/ssh', (req, res) => {
     const { username, password, command, host } = req.body;
-    console.log( `[OK] SSH to: ${host}, running: ${command}` );
     let commandSent = false;
     let output = '';
 
@@ -66,9 +65,8 @@ app.post('/ssh', (req, res) => {
                 cleanedOutput = output; // For other commands, don't clean
             }
 
-            return res.json({
-                // stdout: output,
-                stdout: cleanedOutput,
+            res.json({
+                stdout: output,
                 stderr: '',
                 rc: 0,
                 error_msg: null,
@@ -81,7 +79,7 @@ app.post('/ssh', (req, res) => {
     setTimeout(() => {
         if (!res.headersSent) {
             ssh.kill();
-            return res.json({
+            res.json({
                 stdout: output,
                 stderr: 'Timeout occurred',
                 rc: 1,
@@ -221,17 +219,13 @@ const { exec } = require('child_process'); // Import exec
 
 app.post('/find-device', (req, res) => {
     $final_target = req.body.final_target; // Get final_target from the request body
-    let errorMessage = null;
-    let foundDevice = null;
 
     const exec = require('child_process').exec;
     exec(`ping -c 1 ${$final_target}`, (error, stdout, stderr) => {
         if (error) {
-            errorMessage = `${$final_target} is not reachable`;
-            console.error(`[ERROR] ${errorMessage}`);
-            // console.error(`[ERROR] ${$final_target} is not reachable`);
+            console.error(`[ERROR] ${$final_target} is not reachable`);
             // process.exit(1);
-            // return res.status(400).json({ error: `${$final_target} is not reachable` });
+            return res.status(400).json({ error: `${$final_target} is not reachable` });
 
         } else {
             console.log(`${$final_target} is reachable`);
@@ -240,8 +234,9 @@ app.post('/find-device', (req, res) => {
 
     // PHASE 1: SSH into each AGG Switch, and save "show mac-a" or "show mac a" to a table. Filter out to only lines which contain a '/', such as: "d08a.abcd.d419 1/1/9 Dynamic 180"
     let agg_switches = [
-        "lm-sw01.lm.local", "lm-sw03.lm.local"
+        "lm-sw01.lm.local"
     ];
+
     let results = [];
     let fetchPromises = agg_switches.map(host => {
         return fetch('http://localhost:5000/ssh', {
@@ -412,18 +407,15 @@ app.post('/find-device', (req, res) => {
                 }
                 );
 
-                if (errorMessage) {
-                    console.log(`[FIN] target ${target} NOT found: ${errorMessage}`); // Log the error message (errorMessage)
-                    res.status(400).json({ error: errorMessage });
-                } else if (foundDevice) {
-                    console.log(`[FIN] target ${target} found:`);
+                if (foundDevice) {
+                    console.log(`Final target ${target} found:`);
                     console.log(foundDevice);
                     // Return success and the foundDevice object
-                    return res.status(200).json(foundDevice);
+                    res.status(200).json(foundDevice);
                 } else {
-                    console.log(`[FIN] target ${target} NOT found in newDevices.`);
+                    console.log(`Final target ${target} NOT found in newDevices.`);
                     // Return error
-                    return res.status(400).json({ error: `[FIN] target ${target} NOT found` });
+                    return;// res.status(400).json({ error: `Final target ${target} NOT found` });
                 }
             }
 
@@ -431,7 +423,7 @@ app.post('/find-device', (req, res) => {
             else {
                 console.log('No final target specified.');
                 // Return error
-                return res.status(400).json({ error: 'No final target specified' });
+                res.status(400).json({ error: 'No final target specified' });
             }
 
         });
