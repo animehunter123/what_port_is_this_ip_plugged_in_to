@@ -397,8 +397,8 @@ app.post('/find-device', (req, res) => {
                     // console.log(`@@@ OK processtarget is /...`)
                     // console.log(processedTarget.toLowerCase());
                     // console.log(`@@@ OK target is ${target}`)
-                    console.log(`@@@ OK processedtarget is ${processedTarget}`)
-                    console.log(`@@@ OK dev_hostname is ${device.dev_hostname}\n`)
+                    // console.log(`@@@ OK processedtarget is ${processedTarget}`)
+                    // console.log(`@@@ OK dev_hostname is ${device.dev_hostname}\n`)
 
                     return device.dev_mac.toLowerCase() === processedTarget.toLowerCase() ||
                         device.dev_ip.toLowerCase() === processedTarget.toLowerCase() ||
