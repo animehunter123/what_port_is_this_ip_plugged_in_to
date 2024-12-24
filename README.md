@@ -17,7 +17,9 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 
 # TODO
 
-* Timeout with AbortApi in frontend is required. This is a bit difficult, but need to do it for reactivity
+* Timeout with AbortApi in frontend is required. This is a bit difficult, but need to do it for reactivity (The user after clicking a button has no idea what the status is in the serverlogs, and also if it "never ssh's")
+
+* Need a ping check in /ssh before even attempting to ssh to return faster on failures in the back-end
 
 * Need to add error checking on startup to ensure this file exists, example: ```ls target_dns/test.local_2024.12.23.zone```
 
