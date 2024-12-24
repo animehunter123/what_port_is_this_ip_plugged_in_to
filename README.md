@@ -19,8 +19,20 @@ Proof of concept webapp with fronend/backend (and using external dependency: rem
 
 # TODO
 
-* remove the hardcoded lm-sw01 from the spacebar checker
+* Fix the server crashes, when I do 2 posts of "BB", it crashes the server with
+```
+node:internal/errors:496
+    at ServerResponse.header (/mnt/c/Users/ahmed-adm/dev/what_port_is_this_ip_plugged_in_to/backend/api/node_modules/express/lib/response.js:794:10)
+    at ServerResponse.send (/mnt/c/Users/ahmed-adm/dev/what_port_is_this_the clientip_plugged_in_to/backend/api/node_modules/express/lib/response.js:174:12)
 
+    at ServerResponse.json (/mnt/c/Users/ahmed-adm/dev/what_port_is_this_s_ip_plugged_in_to/backend/api/node_modules/express/lib/reip_plugged_in_to/backend/api/node_modules/express/lib/response.js:278:15)
+                                                                         ip_plugged_in_to/backend/api/node_modules/express/lib/resp
+```
+
+* remove the hardcoded lm-sw01 from the spacebar checker
+```javascript
+} else if (data.includes('SSH@LM-SW01>') && !commandSent) {
+```
 * make finder/main.js do everything to get the fields
 
 * dockerize it before final release
